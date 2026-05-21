@@ -6,6 +6,7 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <link rel="stylesheet" href="css/nepali.datepicker.v5.0.6.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
@@ -194,6 +195,7 @@ dimension=ou%3AUSER_ORGUNIT
 */
 
 const baseUrl = "../../..";
+var isoStartDate, isoEndDate;
 
 // =====================
 // Load LINELIST Reports
@@ -385,12 +387,12 @@ function render(data) {
 $("#loadBtn").click(async () => {
 
     const id = $("#reportSelect").val();
-    const startDate = $("#startDate").val();
-    const endDate = $("#endDate").val();
+    //const startDate = $("#startDate").val();
+    //const endDate = $("#endDate").val();
 
     const config = await getVisualization(id);
 
-    const url = buildUrl(config, startDate, endDate);
+    const url = buildUrl(config, isoStartDate, isoEndDate);
 
     //console.log("Generated URL:", url);
 
@@ -450,7 +452,11 @@ function convertTableDatesToBS() {
 // INIT
 $(document).ready(function(){
     loadReports();
-    $("#startDate").NepaliDatePicker();
+    $("#startDate").NepaliDatePicker({
+        "onSelect":function(date){
+            console.log(date);
+        }
+    });
     $("#endDate").NepaliDatePicker(); 
 });
 </script>
