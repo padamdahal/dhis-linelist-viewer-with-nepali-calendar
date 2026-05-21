@@ -197,9 +197,7 @@ dimension=ou%3AUSER_ORGUNIT
 const baseUrl = "../../..";
 var isoStartDate, isoEndDate;
 
-// =====================
 // Load LINELIST Reports
-// =====================
 async function loadReports() {
     const url = `${baseUrl}/api/eventVisualizations?fields=id,name,type&filter=type:eq:LINE_LIST&paging=false`;
 
@@ -214,18 +212,14 @@ async function loadReports() {
     });
 }
 
-// =====================
-// Get Full Config
-// =====================
+// Get selected eventViaualization by ID
 async function getVisualization(id) {
 	const url = `${baseUrl}/api/eventVisualizations/${id}.json?id,name,attributeDimensions,dataElementDimensions,type,program,programStage,columnDimension,metadata&filter=type:eq:LINE_LIST&&paging=false`;
     const res = await fetch(url);
     return await res.json();
 }
 
-// =====================
 // Build API URL (IMPORTANT PART)
-// =====================
 function buildUrl(config, startDate, endDate) {
 
     const program = config.program.id;
@@ -293,9 +287,7 @@ function buildUrl(config, startDate, endDate) {
     return url;
 }
 
-// =====================
 // Fetch Data
-// =====================
 async function fetchData(url) {
 	
     $("#output").html('<div class="loading">Loading...</div>');
@@ -343,9 +335,7 @@ function enhanceTable() {
     });
 }
 
-// =====================
 // Render Table
-// =====================
 function render(data) {
 
     if (!data.rows || data.rows.length === 0) {
@@ -381,9 +371,7 @@ function render(data) {
 	*/
 }
 
-// =====================
 // BUTTON CLICK
-// =====================
 $("#loadBtn").click(async () => {
 
     const id = $("#reportSelect").val();
@@ -458,9 +446,10 @@ $(document).ready(function(){
             isoStartDate = NepaliFunctions.BS2AD(date.value);
         }
     });
+    
     $("#endDate").NepaliDatePicker({
         "onSelect":function(date){
-            console.log("endDate:",date);
+            console.log("endDate:", date.value);
             isoEndDate = NepaliFunctions.BS2AD(date.value);
         }
     }); 
