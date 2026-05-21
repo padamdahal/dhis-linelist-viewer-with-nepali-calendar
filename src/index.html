@@ -454,14 +454,14 @@ $(document).ready(function(){
     loadReports();
     $("#startDate").NepaliDatePicker({
         "onSelect":function(date){
-            console.log(date);
-            isoStartDate = NepaliFunctions.BS2AD(date);
+            console.log("startDate:", date);
+            isoStartDate = NepaliFunctions.BS2AD(date.value);
         }
     });
     $("#endDate").NepaliDatePicker({
         "onSelect":function(date){
-            console.log(date);
-            isoEndDate = NepaliFunctions.BS2AD(date);
+            console.log("endDate:",date);
+            isoEndDate = NepaliFunctions.BS2AD(date.value);
         }
     }); 
 });
