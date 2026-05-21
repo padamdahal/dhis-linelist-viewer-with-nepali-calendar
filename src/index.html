@@ -118,10 +118,10 @@
     <select id="reportSelect"></select>
 
     <label>Start Date:</label>
-    <input type="date" id="startDate">
+    <input type="text" id="startDate">
 
     <label>End Date:</label>
-    <input type="date" id="endDate">
+    <input type="text" id="endDate">
 
     <button id="loadBtn">Load Report</button>
 </div>
@@ -448,7 +448,11 @@ function convertTableDatesToBS() {
 }
 
 // INIT
-$(document).ready(loadReports);
+$(document).ready(function(){
+    loadReports();
+    $("#startDate").NepaliDatePicker();
+    $("#endDate").NepaliDatePicker(); 
+});
 </script>
 
 </body>
