@@ -2,7 +2,7 @@
 
 # Define the target folder and the output zip name
 FOLDER="src"
-OUTPUT="../build/app.zip"
+OUTPUT="../build/nepali-calendar-helper.zip"
 
 # Check if the folder exists
 if [ -d "$FOLDER" ]; then

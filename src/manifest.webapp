@@ -8,9 +8,9 @@
   },
   "type": "app",
   "coreApp": false,
-  "name": "Register Viewer",
+  "name": "Nepali Calendar Helper",
   "version": "1.0.0",
-  "description": "View saved line lists",
+  "description": "Provide BS to AD conversion and displays inline calendar",
   "developer": {
     "name": "Padam",
     "email": "",
