@@ -8,7 +8,7 @@
   },
   "type": "app",
   "coreApp": false,
-  "name": "Linelist Viewer",
+  "name": "Register Viewer",
   "version": "1.0.0",
   "description": "View saved line lists",
   "developer": {

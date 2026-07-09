@@ -1,462 +1,294 @@
-$(document).ready(function () {
-	const todayNP = NepaliFunctions.BS.GetCurrentDate();
-	var npMonth = ((todayNP.month-1) == 0)? 12 : (todayNP-1);
-	var npYear = ((todayNP.month-1) == 0) ? (todayNP.year-1) : todayNP.year;
+$(document).ready(function(){
+	/*
+	Sample Event Visualization Call (HTML) - Single Stage (Events)
+	https://sudurpashchim.hmis.gov.np/api/42/analytics/events/query/kvottqqHM1j.html+css?
+	dimension=ou:USER_ORGUNIT
+	&dimension=q3NpuWzGvso
+	&dimension=yBYTz1M15tf
+	&dimension=MqBkcXtzszn
+	&dimension=RzyHxE71iyC
+	&dimension=WPekgdeclbX
+	&dimension=SbNxjxMkC0w
+	&dimension=bqd9yievDDw.gSGUznPF0Pk
+	&dimension=bqd9yievDDw.khLAuIZWcWz
+	&dimension=bqd9yievDDw.BaULJOvGIWd
+	&dimension=bqd9yievDDw.Ywk0nodmiOh
+	&dimension=bqd9yievDDw.epAqgYgiHgZ
+	&dimension=bqd9yievDDw.cDvtYGWN7V9
+	&dimension=bqd9yievDDw.GBrGuZZVrrD
+	&dimension=bqd9yievDDw.pzUhqWYhCKF
+	&dimension=bqd9yievDDw.xcofI3Azrtc
+	&dimension=bqd9yievDDw.xXLeRzcLQCw
+	&displayProperty=SHORTNAME
+	&outputType=EVENT
+	&stage=bqd9yievDDw
+	&tableLayout=true
+	&columns=ou;eventDate;q3NpuWzGvso;yBYTz1M15tf;MqBkcXtzszn;RzyHxE71iyC;WPekgdeclbX;SbNxjxMkC0w;gSGUznPF0Pk;khLAuIZWcWz;BaULJOvGIWd;Ywk0nodmiOh;epAqgYgiHgZ;cDvtYGWN7V9;GBrGuZZVrrD;pzUhqWYhCKF;xcofI3Azrtc;xXLeRzcLQCw
+	&headers=ouname,eventdate,q3NpuWzGvso,yBYTz1M15tf,MqBkcXtzszn,RzyHxE71iyC,WPekgdeclbX,SbNxjxMkC0w,bqd9yievDDw.gSGUznPF0Pk,bqd9yievDDw.khLAuIZWcWz,bqd9yievDDw.BaULJOvGIWd,bqd9yievDDw.Ywk0nodmiOh,bqd9yievDDw.epAqgYgiHgZ,bqd9yievDDw.cDvtYGWN7V9,bqd9yievDDw.GBrGuZZVrrD,bqd9yievDDw.pzUhqWYhCKF,bqd9yievDDw.xcofI3Azrtc,bqd9yievDDw.xXLeRzcLQCw
+	&dataIdScheme=NAME
+	&paging=false
+	&asc=yBYTz1M15tf
+	*/
 	
-	//loadPeriod(npYear);
-	//console.log("DHIS2 Shell loaded? ", typeof window.d2 !== "undefined");
-	//console.log(sessionStorage.getItem("tempCreds"));
-
-	const hmisBaseUrl = "https://hmis.gov.np/hmis";
-	$("#hmisBaseUrl").html(hmisBaseUrl);
+	/*
+	Multiple Stages (Enrollment)
+	https://sudurpashchim.hmis.gov.np/api/42/analytics/enrollments/query/kvottqqHM1j.html+css?
+	dimension=ou%3AUSER_ORGUNIT
+	&dimension=q3NpuWzGvso
+	&dimension=yBYTz1M15tf
+	&dimension=MqBkcXtzszn
+	&dimension=RzyHxE71iyC
+	&dimension=SbNxjxMkC0w
+	&dimension=WPekgdeclbX
+	&dimension=fvTV0ZdtZUf.zuJPjWzRdYV
+	&dimension=bqd9yievDDw.khLAuIZWcWz
+	&dimension=bqd9yievDDw.gSGUznPF0Pk
+	&dimension=bqd9yievDDw.epAqgYgiHgZ
+	&dimension=bqd9yievDDw.cDvtYGWN7V9
+	&dimension=bqd9yievDDw.GBrGuZZVrrD
+	&dimension=bqd9yievDDw.Ywk0nodmiOh
+	&dimension=bqd9yievDDw.pzUhqWYhCKF
+	&dimension=bqd9yievDDw.xcofI3Azrtc
+	&dimension=bqd9yievDDw.xXLeRzcLQCw
+	&displayProperty=SHORTNAME
+	&outputType=ENROLLMENT
+	&tableLayout=true
+	&columns=ou%3Bq3NpuWzGvso%3ByBYTz1M15tf%3BMqBkcXtzszn%3BRzyHxE71iyC%3BSbNxjxMkC0w%3BWPekgdeclbX%3BzuJPjWzRdYV%3BkhLAuIZWcWz%3BgSGUznPF0Pk%3BepAqgYgiHgZ%3BcDvtYGWN7V9%3BGBrGuZZVrrD%3BYwk0nodmiOh%3BpzUhqWYhCKF%3BxcofI3Azrtc%3BxXLeRzcLQCw
+	&headers=ouname%2Cq3NpuWzGvso%2CyBYTz1M15tf%2CMqBkcXtzszn%2CRzyHxE71iyC%2CSbNxjxMkC0w%2CWPekgdeclbX%2CfvTV0ZdtZUf.zuJPjWzRdYV%2Cbqd9yievDDw.khLAuIZWcWz%2Cbqd9yievDDw.gSGUznPF0Pk%2Cbqd9yievDDw.epAqgYgiHgZ%2Cbqd9yievDDw.cDvtYGWN7V9%2Cbqd9yievDDw.GBrGuZZVrrD%2Cbqd9yievDDw.Ywk0nodmiOh%2Cbqd9yievDDw.pzUhqWYhCKF%2Cbqd9yievDDw.xcofI3Azrtc%2Cbqd9yievDDw.xXLeRzcLQCw
+	&dataIdScheme=NAME
+	&paging=false
+	&asc=yBYTz1M15tf
+	*/
 	
-	let baseUrl = window.location.origin;
-	const pathSegment = window.location.pathname.split('/')[1];
-	if (pathSegment !== null && pathSegment !== 'undefined') {
-		baseUrl += "/" + pathSegment;
-	}
-
-	let programIndicators = [];
+	const baseUrl = "../../..";
+	var isoStartDate, isoEndDate;
 	
-	let selectedDataset = $("#datasetList").val();
-	let selectedDatasetTitle = $("#datasetList option:selected").text();
+	// Load LINELIST Reports
+	async function loadReports() {
+			const url = `${baseUrl}/api/eventVisualizations?fields=id,name,type&filter=type:eq:LINE_LIST&paging=false`;
 	
-	let selectedPeriod = $("#period").val();
-	let selectedPeriodName = $("#period option:selected").text();
+			const res = await fetch(url);
+			const data = await res.json();
 	
-	let selectedOrgUnit = $("#orgUnitList").val();
-	let selectedOrgUnitCode = $("#orgUnitList option:selected").data("code");
-	let hmisOuId = null;
+			const select = $("#reportSelect");
+			select.empty();
 	
-	let finalJSON = {};
-
-	// ------------------ INIT ------------------
-	async function init() {
-		$("#mainContent").hide();
-		$("#msgContent").show();
-		
-		$("#submissionStatus").hide();
-		$("#submitBtnContainer").hide();
-			
-		if (sessionStorage.getItem("tempCreds")) {
-			$("#loginPanel").hide();
-			$("#showLoginBtn").show();
-			$("#loadData").show();
-			
-			loadPeriod(npYear);
-			
-			await Promise.all([
-				loadUserOrgUnit(),
-				getAvailableDatasets(),
-				getLocalProgramIndicators()
-			]);
-		} else {
-			$("#loginPanel").show();
-			$("#showLoginBtn").hide();
-			$("#loadData").hide();
-		}
-	}
-
-	// ------------------ HELPERS ------------------
-	function getAuthHeader() {
-		return {
-			'Authorization': 'Basic ' + sessionStorage.getItem("tempCreds")
-		};
-	}
-
-	async function apiGet(url, options = {}) {
-		return $.ajax({
-			url,
-			method: "GET",
-			contentType: options.contentType || "application/json",
-			headers: options.headers || {},
-		});
-	}
-
-	async function apiPost(url, data, options = {}) {
-		return $.ajax({
-			url,
-			method: "POST",
-			contentType: "application/json",
-			headers: options.headers || {},
-			data: JSON.stringify(data)
-		});
-	}
-
-	function showError() {
-		$("#loginError").show();
-	}
-
-	function loadPeriod(year) {
-		if(year <= npYear){
-			const months = ["Baisakh", "Jestha", "Asar", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Paush", "Magh", "Falgun", "Chaitra"];
-			$("#period").empty();
-			let start = (year == npYear) ? npMonth : 12;
-			for (let m = start; m >= 1; m--) {
-				const value = year + ("0" + m).slice(-2);
-				$("#period").append(
-					$("<option></option>").text(`${months[m - 1]} ${year}`).val(`${value}`)
-				);
-			}
-		}
-		// Set global period variables
-		selectedPeriod = $("#period").val();
-		selectedPeriodName = $("#period option:selected").text();
-	}
-
-	async function getAvailableDatasets() {
-		try {
-			console.log("Getting available datasets from HMIS");
-
-			const res = await apiGet(
-				`${hmisBaseUrl}/api/dataSets?fields=name,id&paging=false`,
-				{ headers: getAuthHeader() }
-			);
-
-			$("#datasetList").empty();
-			res.dataSets.forEach(ds => {
-				if(ds.name.substring(0,2) !== "00"){
-					$("#datasetList").append(
-						$("<option></option>").text(ds.name).val(ds.id)
-					);
-				}
+			data.eventVisualizations.forEach(r => {
+					select.append(`<option value="${r.id}">${r.name}</option>`);
 			});
-			
-			// Set global variables for immediate action
-			selectedDataset = $("#datasetList").val();
-			selectedDatasetTitle = $("#datasetList option:selected").text();
-
-		} catch (e) {
-			showError("Error getting data sets.");
-		}
 	}
-
-	async function loadUserOrgUnit() {
-		console.log("Loading user orgUnit...");
-		try {
-			const res = await apiGet(
-				`${baseUrl}/me?fields=organisationUnits[name,id,level,code]`
-			);
-
-			$("#orgUnitList").empty();
-			
-			/*$("#orgUnitList").append(
-				$("<option></option>").text("Test Health Post").val("bo81YbFQLF4").attr("data-code", "7070100021")
-			);*/
-			
-			res.organisationUnits.forEach(ou => {
-				if(!ou.code){
-					console.log("OrgUnit code is missing...");
-				}
-				
-				$("#orgUnitList").append(
-					$("<option></option>").text(ou.name).val(ou.id).attr("data-code", ou.code)
-				);
+	
+	// Get selected eventViaualization by ID
+	async function getVisualization(id) {
+		const url = `${baseUrl}/api/eventVisualizations/${id}.json?id,name,attributeDimensions,dataElementDimensions,type,program,programStage,columnDimension,metadata&filter=type:eq:LINE_LIST&&paging=false`;
+			const res = await fetch(url);
+			return await res.json();
+	}
+	
+	// Build API URL (IMPORTANT PART)
+	function buildUrl(config, startDate, endDate) {
+	
+			const program = config.program.id;
+			const stage = config.programStage.id;
+	
+			let url = `${baseUrl}/api/analytics/events/query/${program}.html?`;
+	
+			// OU
+			url += "dimension=ou:USER_ORGUNIT&";
+	
+			// ATTRIBUTES
+			let attrIds = config.attributeDimensions.map(a => a.attribute.id);
+	
+			attrIds.forEach(id => {
+					url += `dimension=${id}&`;
 			});
-			
-			selectedOrgUnit = $("#orgUnitList").val();
-			
-		} catch (e) {
-			showError();
-		}
-	}
-
-	async function getRemoteOrgUnitIdByCode(code) {
-		if (!code) return null;
-
-		try {
-			const res = await apiGet(
-				`${hmisBaseUrl}/api/organisationUnits?filter=code:eq:${code}&fields=id,name,code`,
-				{ headers: getAuthHeader() }
-			);
-
-			if (res.organisationUnits && res.organisationUnits.length > 0) {
-				const remoteId = res.organisationUnits[0].id;
-
-				// Set global variable
-				hmisOuId = remoteId;
-			}
-		} catch (e) {
-			console.error("Error fetching remote OU", e);
-			return null;
-		}
-	}
-
-	async function getLocalProgramIndicators() {
-		try {
-			const res = await apiGet(
-				`${baseUrl}/programIndicators?fields=id,name,attributeValues[value,attribute[name]],aggregateExportCategoryOptionCombo&paging=false`
-			);
-
-			programIndicators = res.programIndicators;
-
-		} catch (e) {
-			showError("Error getting program indicators.");
-		}
-	}
-
-	async function loadSelectedDatasetForm() {
-		try {
-			$("#mainContent").show();
-			$("#msgContent").hide();
-			$("#datasetTitle").text(`Dataset: ${selectedDatasetTitle} ( ${selectedPeriodName} )`);
-			
-			console.log("Getting selected data set form...");
-			const res = await apiGet(
-				`${hmisBaseUrl}/api/dataSets/${selectedDataset}?fields=name,id,dataEntryForm[htmlCode]`,
-				{
-					contentType: "text/html",
-					headers: getAuthHeader()
-				}
-			);
-			
-			// Render the form html and make the input fields readonly
-			$("#mainFormContainer").html(res.dataEntryForm.htmlCode);
-			$("#mainFormContainer")
-				.find("input, select, textarea")
-				.prop("readonly", true)
-				.prop("disabled", true);
-			
-			// Get HMIS orgUnit ID for completeness check and data submission
-			await getRemoteOrgUnitIdByCode($("#orgUnitList option:selected").data("code"));
-			
-			// Fill the local data in the form for validation
-			await fillLocalData();
-			
-			$("#submissionStatus").show();
-			$("#submitBtnContainer").show();
-			
-			// Check if the data already submitted and warn user
-			await checkDatasetCompleteness();
-			
-		} catch (e) {
-			showError("Error loading dataset.");
-		}
-	}
-
-	async function fillLocalData() {
-
-		const inputs = $("#mainFormContainer").find("input[id], select[id], textarea[id]");
-		const piIdsToQuery = [];
-
-		console.log("Filtering program indicators to fetch data...");
-
-		inputs.each(function () {
-			const idParts = $(this).attr("id").split("-");
-			if (idParts.length !== 3) return;
-
-			const deId = idParts[0];
-
-			programIndicators.forEach(pi => {
-				pi.attributeValues.forEach(av => {
-					if (
-						av.attribute.id === "b8KbU93phhz" &&
-						av.value === deId
-					) {
-						if (!piIdsToQuery.includes(pi.id)) {
-							piIdsToQuery.push(pi.id);
-						}
-					}
-				});
+	
+			// DATA ELEMENTS
+			let deIds = config.dataElementDimensions.map(d => d.dataElement.id);
+	
+			config.dataElementDimensions.forEach(d => {
+					url += `dimension=${d.programStage.id}.${d.dataElement.id}&`;
 			});
-		});
-
-		if (piIdsToQuery.length === 0) return;
-		
-		// Ensure orgUnit and period
-		const selectedOrgUnit = document.getElementById("orgUnitList").value;
-		const selectedPeriod = document.getElementById("period").value;
-		
-		// Date conversion logic
-		const isoPe = getIsoDatesFromBsMonth(selectedPeriod);
-		
-		const analyticsUrl = `${baseUrl}/analytics.json?dimension=dx:${piIdsToQuery.join(";")}` +
-			`&filter=ou:${selectedOrgUnit}` +
-			`&filter=pe:${isoPe.join(";")}` +
-			`&outputIdScheme=UID`;
-
-		try {
-			console.log("Getting local program indicator data");
-			const res = await apiGet(analyticsUrl);
-			const dataValues = [];
-			
-			console.log("Setting data in respecitve input fields and preparing dataValues...");
-			res.rows.forEach(row => {
-				const dataPi = row[0];
-				const dataValue = parseInt(row[1]);
-
-				const pi = programIndicators.find(p => p.id === dataPi);
-				const cocId = pi.aggregateExportCategoryOptionCombo;
-
-				const filteredPi = pi.attributeValues.find(
-					av => av.attribute.id === "b8KbU93phhz"
-				);
-
-				const deId = filteredPi ? filteredPi.value : null;
-				const el = document.getElementById(`${deId}-${cocId}-val`);
-				
-				if(el){
-					el.value = dataValue;
-				}
-				
-				if (!isNaN(dataValue) && dataValue !== 0) {
-					dataValues.push({
-						dataElement: deId,
-						categoryOptionCombo: cocId,
-						value: dataValue
-					});
-				}
+	
+			// DATE FILTER
+			if (startDate && endDate) {
+					url += `startDate=${startDate}&endDate=${endDate}&`;
+			}
+	
+			// STAGE
+			url += `stage=${stage}&`;
+	
+			// OUTPUT
+			url += "displayProperty=SHORTNAME&outputType=EVENT&tableLayout=true&dataIdScheme=NAME&paging=false&";
+	
+			// =====================
+			// COLUMNS
+			// =====================
+			let columns = [
+					"ou",
+					"eventDate",
+					...attrIds,
+					...deIds
+			];
+	
+			url += `columns=${columns.join(";")}&`;
+	
+			// =====================
+			// HEADERS
+			// =====================
+			let headers = [
+					"ouname",
+					"eventdate",
+					...attrIds,
+					...config.dataElementDimensions.map(d => `${d.programStage.id}.${d.dataElement.id}`)
+			];
+	
+			url += `headers=${headers.join(",")}&`;
+	
+			// OPTIONAL SORT
+			if (attrIds.length > 0) {
+					url += `asc=${attrIds[0]}&`;
+			}
+	
+			return url;
+	}
+	
+	// Fetch Data
+	async function fetchData(url) {
+	
+			$("#output").html('<div class="loading">Loading...</div>');
+			const res = await fetch(url);
+			return await res.text();
+	}
+	
+	function enhanceTable() {
+	
+			const table = $("#output").find("table").first();
+	
+			if (!table.length) return;
+	
+			if ($.fn.DataTable.isDataTable(table)) {
+					table.DataTable().destroy();
+			}
+	
+			table.DataTable({
+					paging: true,
+					searching: true,
+					ordering: true,
+					pageLength: 25,
+					lengthMenu: [10, 25, 50, 100],
+	
+					dom: 'Bfrtip', // IMPORTANT: enables buttons
+	
+					buttons: [
+							{
+									extend: 'excelHtml5',
+									text: 'Export Excel',
+									title: 'Line List Report',
+									exportOptions: {
+											columns: ':visible'
+									}
+							},
+							{
+									extend: 'print',
+									text: 'Print',
+									title: 'Line List Report',
+									exportOptions: {
+											columns: ':visible'
+									}
+							}
+					]
 			});
-			
-			console.log("Preparing final JSON...");
-			
-			finalJSON = {
-				dataSet: selectedDataset,
-				orgUnit: hmisOuId,
-				period: selectedPeriod,
-				completeDate: new Date().toISOString().substring(0, 10),
-				dataValues: dataValues
-			};
-
-		} catch (e) {
-			showError("Error getting program indicator data...");
-		}
 	}
-
-	async function submitData() {
-		console.log("Submitting data to HMIS...");
-
-		try {
-			const res = await apiPost(
-				`${hmisBaseUrl}/api/dataValueSets`,
-				finalJSON,
-				{ headers: getAuthHeader() }
-			);
-			
-			// Check response details
-			// To Do
-			console.log(res);
-			$("#submissionStatus").html("Data successfully submitted to HMIS!");
-
-		} catch (e) {
-			$("#submissionStatus").html("Failed to submit data to HMIS. Please ask for technical support.");
-		}
-	}
-
-	async function checkDatasetCompleteness() {
-		try {
-			console.log("Checking data set status...");
-			
-			if (!selectedDataset || !hmisOuId || !selectedPeriod) {
-				console.log("Missing parameters...");
-				return;
+	
+	// Render Table
+	function render(data) {
+	
+			if (!data.rows || data.rows.length === 0) {
+					$("#output").html("No data");
 			}
-
-			const orgUnit = $("#orgUnitList").val();
-			const url = `${hmisBaseUrl}/api/completeDataSetRegistrations?dataSet=${selectedDataset}&period=${selectedPeriod}&orgUnit=${hmisOuId}`;
-			const res = await apiGet(url, { headers: getAuthHeader() });
-			if (res.completeDataSetRegistrations && res.completeDataSetRegistrations.length > 0) {
-				const cds = res.completeDataSetRegistrations[0];
-				const completedDate = cds.date || "NA";
-				const completedBy = cds.storedBy || "NA";
-				$("#submissionStatus").html(`<div>Already submitted on <strong>${completedDate}</strong> by <strong>${completedBy}</strong>. Submitting again will overwrite non-zero values.</div>`);
-			} else {
-				$("#submissionStatus").html(`<div>Not yet submitted</div>`);
-			}
-		} catch (e) {
-			showError("Error checking completeness");
+		//console.log(data);
+	
+		if (data){
+			$("#output").html(data);
+			setTimeout(() => {
+							enhanceTable();
+				convertTableDatesToBS();
+					}, 100);
 		}
 	}
 	
-	function getIsoDatesFromBsMonth(period) {
-		console.log("Generating ISO periods for the selected month...");
-		
-		const year = period.substring(0, 4);
-		const month = period.substring(4, 6);
-
-		const dates = [];
-		let day = 1;
-		let continueLoop = true;
-		while (continueLoop) {
-			const bsDate = `${year}-${month}-${String(day).padStart(2, '0')}`;					
+	function convertToBS(adDateStr) {
 			try {
-				if(NepaliFunctions.BS.ValidateDate(bsDate)){
-					const isoDate = NepaliFunctions.BS2AD(bsDate);
-					dates.push(isoDate.replace(/-/g, ''));
-					day++;
-				}else{
-					continueLoop = false;
-				}
+					if (!adDateStr) return adDateStr;
+	
+					const adDate = new Date(adDateStr);
+					const bsDate = NepaliFunctions.AD2BS(adDate);
+			//console.log(bsDate);
+					return bsDate; //`${bsDate.year}-${String(bsDate.month).padStart(2,'0')}-${String(bsDate.day).padStart(2,'0')}`;
+	
 			} catch (e) {
-				console.log("ERROR in period generation: "+e);
+					console.warn("Date conversion failed:", adDateStr);
+					return adDateStr;
 			}
-		}
-		return dates;
 	}
 	
-	// ------------------ EVENTS ------------------
-	$("#prev").click(function () {
-		var year = parseInt($("#period").val().substring(0,4))-1;
-		loadPeriod(year);
-	});
-
-	$("#next").click(function () {
-		var year = parseInt($("#period").val().substring(0,4))+1;
-		loadPeriod(year);
-	});
-
-	$("#loginBtn").click(async function () {
-		const user = $("#hmisUser").val();
-		const pass = $("#hmisPass").val();
-
-		if (!user || !pass) {
-			alert("Enter username and password");
-			return;
+	function convertTableDatesToBS() {
+	
+			const table = $("#output").find("table").first();
+			if (!table.length) return;
+	
+			// Find date columns by header
+			let dateIndexes = [];
+	
+			table.find("thead th").each(function (index) {
+					const text = $(this).text().toLowerCase();
+	
+					if (text.includes("date") || text.includes("मिति")) {
+							dateIndexes.push(index);
+					}
+			});
+	
+			if (dateIndexes.length === 0) return;
+	
+			// Convert each cell
+			table.find("tbody tr").each(function () {
+	
+					dateIndexes.forEach(i => {
+	
+							const cell = $(this).find("td").eq(i);
+							const value = cell.text().trim();
+				//console.log(value);
+							const converted = convertToBS(value);
+				//console.log(converted);
+							cell.text(value.substring(0,10) + " | " + converted);
+					});
+			});
+	}
+	
+	// INIT
+	loadReports();
+	
+	$("#startDate").NepaliDatePicker({
+		"onSelect":function(date){
+					console.log("startDate:", date.value);
+					isoStartDate = NepaliFunctions.BS2AD(date.value);
 		}
-
-		const encodedCredentials = btoa(user + ':' + pass);
-		sessionStorage.setItem("tempCreds", encodedCredentials);
-
-		await init();
-
-		$("#loginPanel").hide();
-		$("#showLoginBtn").show();
-		$("#loadDataPanel").show();
 	});
 
-	$("#loadData").click(async function () {
-		await loadSelectedDatasetForm();
+	$("#endDate").NepaliDatePicker({
+			"onSelect":function(date){
+					console.log("endDate:", date.value);
+					isoEndDate = NepaliFunctions.BS2AD(date.value);
+			}
 	});
 
-	$("#showLoginBtn").click(function () {
-		$("#loginPanel").show();
-		$(this).hide();
+	// BUTTON CLICK
+	$("#loadBtn").click(async () => {
+			const id = $("#reportSelect").val();
+			const config = await getVisualization(id);
+			const url = buildUrl(config, isoStartDate, isoEndDate);
+			const data = await fetchData(url);
+			render(data);
 	});
-	
-	$("#hideLoginBtn").click(function () {
-		$("#loginPanel").hide();
-		$("#showLoginBtn").show();
-	});
-	
-
-	$(document).on("change", "#period", function () {
-		selectedPeriod = $("#period").val();
-	});
-	
-	$(document).on("change", "#orgUnitList", function () {
-		selectedOrgUnit = $("#orgUnitList").val();
-	});
-
-	$(document).on("change", "#datasetList", function () {
-		selectedDataset = $("#datasetList").val();
-		selectedDatasetTitle = $("#datasetList option:selected").text();
-	});
-
-	$("#submitDataBtn").click(async function () {
-		await submitData();
-	});
-
-	// ------------------ START ------------------
-	init();
-
 });
