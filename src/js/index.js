@@ -89,7 +89,7 @@ $(document).ready(function(){
 	function buildUrl(config, startDate, endDate) {
 	
 			const program = config.program.id;
-			const stage = config.programStage.id;
+			const stage = (config.programStage)?config.programStage.id:null;
 	
 			let url = `${baseUrl}/api/analytics/events/query/${program}.html?`;
 	
