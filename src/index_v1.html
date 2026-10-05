@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+    <head>
+        <title>DHIS2 Line List Viewer</title>
+
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <link rel="stylesheet" href="css/nepali.datepicker.v5.0.6.min.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css"
+        />
+
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+
+        <!-- Export dependencies -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+        <script
+            type="text/javascript"
+            src="js/nepali.datepicker.v5.0.6.min.js"
+        ></script>
+        <script type="text/javascript" src="js/index.js"></script>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                background: #f5f7fa;
+            }
+
+            .gridDiv h3,
+            .gridDiv h4 {
+                display: none;
+            }
+            .gridDiv {
+                padding: 10px;
+            }
+
+            .header {
+                background: #2c3e50;
+                color: white;
+                padding: 15px;
+                font-size: 18px;
+            }
+
+            .top-panel {
+                background: #ffffff;
+                padding: 15px;
+                display: flex;
+                gap: 15px;
+                align-items: center;
+                border-bottom: 1px solid #ddd;
+                position: sticky;
+                top: 0;
+                z-index: 2;
+            }
+
+            .top-panel select,
+            .top-panel input,
+            .top-panel button {
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            .main-panel {
+                padding: 15px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+            }
+
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+
+            th {
+                background: #ccc !important;
+                color: white;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 20px;
+                font-size: 16px;
+            }
+
+            #output {
+                font-size: 75%;
+                width: 100%;
+                overflow-x: auto; /* horizontal scroll */
+                overflow-y: auto; /* vertical scroll (optional) */
+                border: 1px solid #ddd;
+                background: white;
+            }
+            #DataTables_Table_0_wrapper {
+                width: 100%;
+                overflow: auto;
+                max-height: 70vh;
+                position: relative; /* important */
+            }
+
+            #DataTables_Table_0_wrapper thead th {
+                position: sticky;
+                top: 0; /* sticks to top of container */
+                z-index: 3;
+                background: #3498db; /* ensure it covers rows behind */
+                color: white;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="header">Line List Report Viewer</div>
+
+        <div class="top-panel">
+            <label>Report:</label>
+            <select id="reportSelect"></select>
+
+            <label>Start Date:</label>
+            <input type="text" id="startDate" />
+
+            <label>End Date:</label>
+            <input type="text" id="endDate" />
+
+            <button id="loadBtn">Load Report</button>
+        </div>
+
+        <div class="main-panel">
+            <div id="output"></div>
+        </div>
+
+        <script></script>
+    </body>
+</html>
