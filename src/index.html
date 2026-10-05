@@ -7,9 +7,7 @@
 <script
   src="https://meromiti.com/mero-miti.js"
   data-mero-miti-auto="true"
-  data-mero-miti-auto-sync="true"
-  data-mero-miti-locale="en"
-  data-mero-miti-format="YYYY-MM-DD">
+  data-mero-miti-auto-sync="true">
 </script>
 
 <!-- SheetJS for export (matches existing vendored stack — swap this CDN line
@@ -17,10 +15,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-  :root {--border: #cfd8dc; --header-bg: #f5f7f8; --patient-bg: #fbfcfc;--accent: #2c6e91;}
+  :root {
+    --border: #cfd8dc;
+    --header-bg: #f5f7f8;
+    --patient-bg: #fbfcfc;
+    --accent: #2c6e91;
+  }
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; color: #222; }
   h1 { font-size: 18px; margin-bottom: 12px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px;border-bottom: 1px solid #ccc;background: #ddd; padding: 10px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
   .controls label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; }
   .controls select, .controls input, .controls button {
     padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px;
@@ -30,24 +33,80 @@
   .controls button:hover { opacity: 0.9; }
   .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
   .toolbar .right { display: flex; gap: 8px; align-items: center; }
-  table.register {border-collapse: collapse;width: 100%;font-size: 12.5px;}
-  table.register th, table.register td {border: 1px solid var(--border);padding: 6px 8px;text-align: left;vertical-align: top;}
-  table.register thead th {background: var(--header-bg);font-weight: 600;white-space: nowrap;cursor: pointer;user-select: none;
+
+  table.register {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+  }
+  table.register th, table.register td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.register thead th {
+    background: var(--header-bg);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
   }
   table.register thead th.sortable:hover { background: #eceff1; }
   table.register thead th .arrow { font-size: 10px; opacity: 0.6; margin-left: 4px; }
-  table.register td.attr-cell {background: var(--patient-bg);font-weight: 500;vertical-align: middle;}
-  table.register tr.new-patient td {border-top: 2px solid var(--accent);}
+  table.register td.attr-cell {
+    background: var(--patient-bg);
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  table.register tr.new-patient td {
+    border-top: 2px solid var(--accent);
+  }
   .status-msg { font-size: 12px; color: #666; margin: 6px 0; }
   .status-msg.error { color: #b00020; }
   .pagination { display: flex; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
   .pagination button { padding: 4px 10px; }
   .pagination button:disabled { opacity: 0.4; cursor: default; }
 
-  .mero-miti-input-group{border: none !important; background: none !important;}
-  .mero-miti-input{background:#fff !important}
-  
   #printTable { display: none; }
+
+  .ou-popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+  }
+  /* An author stylesheet rule overrides the UA default [hidden]{display:none}
+     even when the HTML has the hidden attribute — "display: flex" above was
+     winning regardless of hidden, which is why the popup showed on page
+     load. Gating the visible state behind :not([hidden]) instead fixes it. */
+  .ou-popup-overlay:not([hidden]) {
+    display: flex;
+  }
+  .ou-popup {
+    background: #fff; border-radius: 6px; width: 360px; max-height: 70vh;
+    display: flex; flex-direction: column; box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  }
+  .ou-popup-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px;
+  }
+  .ou-popup-close {
+    background: none; border: none; font-size: 20px; line-height: 1; cursor: pointer;
+    color: #555; padding: 2px 6px;
+  }
+  .ou-popup-close:hover { color: #000; }
+  .ou-tree { list-style: none; margin: 0; padding: 8px; overflow-y: auto; flex: 1; }
+  .ou-tree ul { list-style: none; margin: 0; padding-left: 18px; }
+  .ou-node-row {
+    display: flex; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 4px;
+    cursor: pointer; font-size: 13px; outline: none;
+  }
+  .ou-node-row:hover { background: #f0f3f4; }
+  .ou-node-row:focus { background: var(--header-bg); box-shadow: inset 0 0 0 2px var(--accent); }
+  .ou-node-row.selected { background: var(--accent); color: #fff; }
+  .ou-toggle { width: 14px; text-align: center; flex-shrink: 0; font-size: 10px; color: #777; }
+  .ou-node-row.selected .ou-toggle { color: #fff; }
+  .ou-toggle.leaf { visibility: hidden; }
+  .ou-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   @media print {
     .controls, .toolbar, .pagination, #statusMsg { display: none !important; }
@@ -58,25 +117,52 @@
 </head>
 <body>
 
-<h1>Register View</h1>
+<h1>Paper Register — Patient Grouped View</h1>
 
 <div class="controls">
   <div>
-    <label>Register Config</label>
+    <label>Line Listing config</label>
     <select id="configSelect">
-      <option value="">-- Select Report --</option>
+      <option value="">-- select report --</option>
+      <option value="anc_demo">ANC Register (demo)</option>
+      <option value="imm_demo">Immunization Register (demo)</option>
     </select>
   </div>
   <div>
-    <label>Start date (AD)</label>
-    <input type="date" id="startDate">
+    <label>Start date (BS)</label>
+    <input type="date" id="startDateBS">
   </div>
   <div>
-    <label>End date (AD)</label>
-    <input type="date" id="endDate">
+    <label>End date (BS)</label>
+    <input type="date" id="endDateBS">
+  </div>
+  <div>
+    <label>Organisation unit</label>
+    <button type="button" id="ouPickerBtn" class="secondary" aria-haspopup="true" aria-expanded="false" aria-controls="ouPopup">
+      <span id="ouPickerLabel">My org unit (default)</span>
+    </button>
   </div>
   <div>
     <button id="fetchBtn">Fetch &amp; Render</button>
+  </div>
+  <div>
+    <button id="demoBtn" class="secondary">Load demo data (no API)</button>
+  </div>
+</div>
+
+<!-- Org unit picker popup: a WAI-ARIA treeview dialog. Keyboard: Up/Down
+     move focus between visible nodes, Right expands/enters children, Left
+     collapses/moves to parent, Enter/Space selects and closes, Escape
+     closes without changing selection. Uses a roving tabindex (one node
+     is tabindex="0" at a time) rather than tabbing through every node. -->
+<div id="ouPopupOverlay" class="ou-popup-overlay" hidden>
+  <div id="ouPopup" class="ou-popup" role="dialog" aria-modal="true" aria-labelledby="ouPopupTitle">
+    <div class="ou-popup-header">
+      <span id="ouPopupTitle">Select organisation unit</span>
+      <button type="button" id="ouPopupClose" class="ou-popup-close" aria-label="Close">&times;</button>
+    </div>
+    <div id="ouTreeStatus" class="status-msg"></div>
+    <ul id="ouTree" class="ou-tree" role="tree" aria-label="Organisation unit hierarchy"></ul>
   </div>
 </div>
 
@@ -89,8 +175,8 @@
   <div class="right">
     <label style="margin:0;">Rows/page:
       <select id="pageSizeSelect">
-        <option value="10" selected>10</option>
-        <option value="20">20</option>
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
         <option value="50">50</option>
       </select>
     </label>
@@ -118,7 +204,7 @@
    CONFIG
    ========================================================================= */
 const CONFIG = {
-  baseUrl: '../../../api',
+  baseUrl: '/ephc/api',
 };
 
 /* =========================================================================
@@ -132,6 +218,8 @@ let filteredPatients = [];
 let sortState = { columnIndex: -1, direction: 1 }; // -1 = no sort (source order)
 let currentPage = 1;
 let pageSize = 20;
+let selectedOu = { id: null, name: 'My org unit (default)' }; // null id => USER_ORGUNIT
+let ouPopupTriggerEl = null; // element to restore focus to when popup closes
 
 /* =========================================================================
    1. FETCH: eventVisualization config -> analytics JSON (unchanged from
@@ -167,6 +255,11 @@ async function populateConfigDropdown() {
     // Keep the demo entries (useful for testing without a live instance),
     // append real ones below a separator.
     if (data.eventVisualizations && data.eventVisualizations.length) {
+      const sep = document.createElement('option');
+      sep.disabled = true;
+      sep.textContent = '──────────';
+      select.appendChild(sep);
+
       data.eventVisualizations
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach(ev => {
@@ -182,6 +275,29 @@ async function populateConfigDropdown() {
   }
 }
 
+// BS→AD conversion is no longer done here at all: startDateBS/endDateBS
+// are now type="date" inputs, and Mero Miti (loaded in <head> with
+// data-mero-miti-auto="true") auto-attaches a BS calendar companion to any
+// input[type="date"] on the page. The user picks a BS date in that
+// companion; Mero Miti writes the converted Gregorian date straight back
+// into THIS input's native value (YYYY-MM-DD) and fires input/change
+// events — so by the time this code reads these inputs' .value, it's
+// already Gregorian. No conversion call needed on our side.
+
+// Builds the real analytics/events "query" endpoint URL from the actual
+// eventVisualization field shape: attributeDimensions (TEI attributes) and
+// dataElementDimensions (stage-scoped DEs) are separate arrays of
+// {attribute:{id}} / {dataElement:{id}} refs, not one flat list — and
+// programStage is a top-level field, not derived from a dimension string.
+//
+// NOTE: there's no outputType in the requested fields, and programStage
+// being a top-level field is being taken as confirmation these LINE_LIST
+// configs are EVENT-scoped (one fixed stage). ENROLLMENT/TRACKED_ENTITY_
+// INSTANCE output isn't handled here yet — add it once we see a real
+// config shape for one of those.
+//
+// startDate/endDate are now expected to already be Gregorian (YYYY-MM-DD),
+// read directly from the type="date" inputs — see note above.
 function buildAnalyticsUrl(evConfig, startDate, endDate, ou) {
   const programId = evConfig.program?.id;
   const stageId = evConfig.programStage?.id;
@@ -254,6 +370,51 @@ function parseAnalyticsResponse(json) {
 }
 
 /* =========================================================================
+   1b/4. CELL VALUE FORMATTING — applied only at display-value extraction
+   (groupByPatient/groupByPatientFixedColumns), never on the raw row values
+   used for chronological sorting, so formatting can't corrupt sort order.
+   ========================================================================= */
+// AD date string -> "AD (BS)" using the real MeroMiti.adToBs/formatBsDate
+// API (confirmed from the actual mero-miti.js source). Feeds a plain
+// {year,month,day} object into adToBs rather than constructing a JS Date,
+// so there's no local-timezone rollover risk on the date-only string.
+function formatWithBs(adDateStr) {
+  if (!adDateStr) return '';
+  const isoPart = String(adDateStr).slice(0, 10);
+  const m = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return adDateStr; // not a plain date string — leave as-is
+  if (!window.MeroMiti || typeof window.MeroMiti.adToBs !== 'function') return adDateStr;
+  try {
+    const bs = window.MeroMiti.adToBs({ year: +m[1], month: +m[2], day: +m[3] });
+    const bsStr = window.MeroMiti.formatBsDate(bs, { format: 'YYYY-MM-DD', locale: 'en', numeral: 'en' });
+    return `${isoPart} (${bsStr})`;
+  } catch (e) {
+    return adDateStr;
+  }
+}
+
+// header.valueType is a real DHIS2 analytics header field (DATE, DATETIME,
+// TRUE_ONLY = "Yes only", BOOLEAN = "Yes/No"). TRUE_ONLY -> tick/blank
+// (there's no real "false" state for that type, only given-or-not).
+// BOOLEAN -> Yes/No text.
+function formatCellValue(rawValue, header) {
+  if (rawValue === undefined || rawValue === null || rawValue === '') return '';
+  const vt = header && header.valueType;
+  if (vt === 'DATE' || vt === 'DATETIME') return formatWithBs(rawValue);
+  if (vt === 'TRUE_ONLY') {
+    const v = String(rawValue).toLowerCase();
+    return (v === 'true' || v === '1') ? '\u2713' : ''; // ✓
+  }
+  if (vt === 'BOOLEAN') {
+    const v = String(rawValue).toLowerCase();
+    if (v === 'true' || v === '1') return 'Yes';
+    if (v === 'false' || v === '0') return 'No';
+    return '';
+  }
+  return rawValue;
+}
+
+/* =========================================================================
    2. GROUP BY PATIENT — builds the patients data model directly (no
       separate "flatten" step; visits stay nested per patient).
    ========================================================================= */
@@ -275,11 +436,14 @@ function groupByPatient(rows, headers, attrCols, dateColumnName, patientKeyCol) 
     if (!map[tei]) {
       map[tei] = {
         tei,
-        attrs: attrIdx.map(i => row[i] ?? ''),
+        // Formatted for display only — the raw row (pushed into _rawRows
+        // below) is what chronological sort uses, so a "2026-08-17
+        // (2083-05-01)" display string never reaches the date comparator.
+        attrs: attrIdx.map(i => formatCellValue(row[i], headers[i])),
         visits: []
       };
     }
-    map[tei].visits.push(visitIdx.map(i => row[i] ?? ''));
+    map[tei].visits.push(visitIdx.map(i => formatCellValue(row[i], headers[i])));
     map[tei]._rawRows = map[tei]._rawRows || [];
     map[tei]._rawRows.push(row);
   });
@@ -315,17 +479,19 @@ function groupByPatientFixedColumns(rows, headers, attrCols, columnDefs, dateCol
   const map = {};
   rows.forEach(row => {
     const tei = row[teiIdx];
-    if (!map[tei]) map[tei] = { tei, attrs: attrIdx.map(i => row[i] ?? ''), _rows: [] };
+    if (!map[tei]) map[tei] = { tei, attrs: attrIdx.map(i => formatCellValue(row[i], headers[i])), _rows: [] };
     map[tei]._rows.push(row);
   });
 
   return Object.values(map).map(p => {
     // Event order matters for "first found wins" when a DE could theoretically
-    // appear more than once — chronological keeps it deterministic.
+    // appear more than once — chronological keeps it deterministic. Scan
+    // checks the RAW value for truthiness (so '' doesn't win), then formats
+    // only the winning value for display.
     const sortedRows = [...p._rows].sort((a, b) => new Date(a[dateIdx]) - new Date(b[dateIdx]));
     const fixedRow = colIdx.map(i => {
       for (const row of sortedRows) {
-        if (row[i]) return row[i];
+        if (row[i]) return formatCellValue(row[i], headers[i]);
       }
       return '';
     });
@@ -345,8 +511,13 @@ function applyFilterAndSort() {
     return inAttrs || inVisits;
   });
 
-  if (sortState.columnIndex >= 0) {
-    const idx = sortState.columnIndex;
+  // sortState.columnIndex is relative to buildHeaderRow's rendered columns,
+  // where index 0 is always "S.N." — shift by -1 before mapping into
+  // attrColumnNames/visitColumns. columnIndex 0 itself is never set (the
+  // S.N. header isn't given a sortable click handler), so idx here is
+  // always >= 0 once reached.
+  if (sortState.columnIndex >= 1) {
+    const idx = sortState.columnIndex - 1;
     const isAttr = idx < attrColumnNames.length;
     filteredPatients.sort((a, b) => {
       let av, bv;
@@ -366,22 +537,34 @@ function applyFilterAndSort() {
 /* =========================================================================
    4. RENDER — rowspan is set once, at creation, never patched afterward.
    ========================================================================= */
+// Column 0 is always "S.N." (serial number) — not part of attrColumnNames/
+// visitColumns since it's purely positional, not sourced from the API.
+// Sort-state column indices are offset by +1 to account for it; index 0
+// itself is not sortable (a running count can't meaningfully be sorted).
 function buildHeaderRow(target) {
   target.innerHTML = '';
+
+  const snTh = document.createElement('th');
+  snTh.textContent = 'S.N.';
+  target.appendChild(snTh);
+
   [...attrColumnNames, ...visitColumns].forEach((name, i) => {
+    // +1 here because the S.N. column occupies index 0 — this is the
+    // index applyFilterAndSort expects (it subtracts 1 back off).
+    const colIndex = i + 1;
     const th = document.createElement('th');
     th.textContent = name;
     if (target.id !== 'printHeaderRow') {
       th.classList.add('sortable');
       th.addEventListener('click', () => {
-        sortState = sortState.columnIndex === i
-          ? { columnIndex: i, direction: -sortState.direction }
-          : { columnIndex: i, direction: 1 };
+        sortState = sortState.columnIndex === colIndex
+          ? { columnIndex: colIndex, direction: -sortState.direction }
+          : { columnIndex: colIndex, direction: 1 };
         currentPage = 1;
         applyFilterAndSort();
         renderScreenTable();
       });
-      if (sortState.columnIndex === i) {
+      if (sortState.columnIndex === colIndex) {
         const arrow = document.createElement('span');
         arrow.className = 'arrow';
         arrow.textContent = sortState.direction === 1 ? '\u25B2' : '\u25BC';
@@ -392,8 +575,12 @@ function buildHeaderRow(target) {
   });
 }
 
-function buildPatientRows(patients, tbody) {
-  patients.forEach(p => {
+// startIndex: position of patients[0] within the full filteredPatients
+// list, so serial numbers stay continuous across pages (page 2 starts at
+// 21, not back at 1) and match exactly between the screen and print views.
+function buildPatientRows(patients, tbody, startIndex) {
+  patients.forEach((p, pIdx) => {
+    const sn = startIndex + pIdx + 1;
     const visitCount = Math.max(p.visits.length, 1);
     p.visits.length === 0 && p.visits.push(visitColumns.map(() => ''));
 
@@ -402,6 +589,12 @@ function buildPatientRows(patients, tbody) {
       if (i === 0) tr.classList.add('new-patient');
 
       if (i === 0) {
+        const snTd = document.createElement('td');
+        snTd.className = 'attr-cell';
+        snTd.rowSpan = visitCount;
+        snTd.textContent = sn;
+        tr.appendChild(snTd);
+
         p.attrs.forEach(val => {
           const td = document.createElement('td');
           td.className = 'attr-cell';
@@ -435,7 +628,7 @@ function renderScreenTable() {
   const start = (currentPage - 1) * pageSize;
   const pagePatients = filteredPatients.slice(start, start + pageSize);
 
-  buildPatientRows(pagePatients, tbody);
+  buildPatientRows(pagePatients, tbody, start);
 
   document.getElementById('pageIndicator').textContent =
     `Page ${currentPage} / ${totalPages} — ${filteredPatients.length} patients`;
@@ -456,7 +649,7 @@ function renderPrintTable() {
   printTable.appendChild(thead);
 
   const tbody = document.createElement('tbody');
-  buildPatientRows(filteredPatients, tbody); // ALL filtered patients, no pagination
+  buildPatientRows(filteredPatients, tbody, 0); // ALL filtered patients, no pagination — SN starts at 1
   printTable.appendChild(tbody);
 }
 
@@ -466,10 +659,11 @@ function renderPrintTable() {
       regardless of how the screen table currently looks.
    ========================================================================= */
 function exportToExcel() {
-  const aoa = [[...attrColumnNames, ...visitColumns]];
-  filteredPatients.forEach(p => {
+  const aoa = [['S.N.', ...attrColumnNames, ...visitColumns]];
+  filteredPatients.forEach((p, pIdx) => {
+    const sn = pIdx + 1;
     p.visits.forEach(visit => {
-      aoa.push([...p.attrs, ...visit]);
+      aoa.push([sn, ...p.attrs, ...visit]);
     });
   });
   const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -479,7 +673,243 @@ function exportToExcel() {
 }
 
 /* =========================================================================
-   6. WIRING
+   6. ORGANISATION UNIT PICKER — accessible treeview popup.
+      WAI-ARIA Treeview pattern: roving tabindex (one node is tabindex="0"
+      at a time), Arrow keys to navigate/expand/collapse, Enter/Space to
+      select, Escape to close. Roots are the current USER's own accessible
+      (data capture) org units — not the whole national hierarchy — so
+      most users see only their own small branch; children are lazy-
+      loaded per node on first expand.
+   ========================================================================= */
+let ouRootsLoaded = false;
+
+async function fetchOuChildren(parentId) {
+  const res = await fetch(`${CONFIG.baseUrl}/organisationUnits.json?filter=parent.id:eq:${parentId}&fields=id,name,path,children::isNotEmpty&order=name:asc&paging=false`);
+  if (!res.ok) throw new Error(`Failed to load org units: ${res.status}`);
+  const data = await res.json();
+  return data.organisationUnits || [];
+}
+
+async function fetchOuRoots() {
+  // "Accessible" = this user's own assigned (data capture) org units,
+  // via /api/me.json — not organisationUnits.json?filter=level:eq:1,
+  // which would be the whole national hierarchy regardless of the user.
+  const res = await fetch(`${CONFIG.baseUrl}/me.json?fields=organisationUnits[id,name,path,children::isNotEmpty]`);
+  if (!res.ok) throw new Error(`Failed to load accessible org units: ${res.status}`);
+  const data = await res.json();
+  return (data.organisationUnits || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function createOuNodeEl(ou, level) {
+  const li = document.createElement('li');
+  li.setAttribute('role', 'none');
+
+  const row = document.createElement('div');
+  row.className = 'ou-node-row';
+  row.setAttribute('role', 'treeitem');
+  row.setAttribute('aria-level', String(level));
+  row.setAttribute('tabindex', '-1');
+  row.dataset.ouId = ou.id;
+  row.dataset.ouName = ou.name;
+  row.dataset.hasChildren = ou.children ? 'true' : 'false';
+  row.dataset.loaded = 'false';
+  if (ou.children) row.setAttribute('aria-expanded', 'false'); // leaf nodes get no aria-expanded at all
+
+  const toggle = document.createElement('span');
+  toggle.className = 'ou-toggle' + (ou.children ? '' : ' leaf');
+  toggle.textContent = ou.children ? '\u25B6' : '';
+  toggle.setAttribute('aria-hidden', 'true');
+
+  const label = document.createElement('span');
+  label.className = 'ou-label';
+  label.textContent = ou.name;
+
+  row.appendChild(toggle);
+  row.appendChild(label);
+  li.appendChild(row);
+
+  if (ou.children) {
+    const group = document.createElement('ul');
+    group.setAttribute('role', 'group');
+    group.style.display = 'none';
+    li.appendChild(group);
+  }
+
+  return li;
+}
+
+function getVisibleTreeItems() {
+  return Array.from(document.querySelectorAll('#ouTree [role="treeitem"]'))
+    .filter(el => el.offsetParent !== null); // excludes nodes inside a collapsed (display:none) group
+}
+
+function setActiveTreeItem(el) {
+  document.querySelectorAll('#ouTree [role="treeitem"]').forEach(n => n.setAttribute('tabindex', '-1'));
+  el.setAttribute('tabindex', '0');
+  el.focus();
+}
+
+async function expandOuNode(row) {
+  const li = row.parentElement;
+  const group = li.querySelector(':scope > ul[role="group"]');
+  if (!group) return; // leaf — nothing to expand
+
+  if (row.dataset.loaded !== 'true') {
+    row.dataset.loaded = 'true';
+    document.getElementById('ouTreeStatus').textContent = `Loading ${row.dataset.ouName}...`;
+    try {
+      const children = await fetchOuChildren(row.dataset.ouId);
+      const level = parseInt(row.getAttribute('aria-level'), 10) + 1;
+      children.forEach(child => group.appendChild(createOuNodeEl(child, level)));
+      document.getElementById('ouTreeStatus').textContent = '';
+    } catch (err) {
+      document.getElementById('ouTreeStatus').textContent = err.message;
+      row.dataset.loaded = 'false';
+      return;
+    }
+  }
+
+  group.style.display = '';
+  row.setAttribute('aria-expanded', 'true');
+  row.querySelector('.ou-toggle').textContent = '\u25BC';
+}
+
+function collapseOuNode(row) {
+  const li = row.parentElement;
+  const group = li.querySelector(':scope > ul[role="group"]');
+  if (!group) return;
+  group.style.display = 'none';
+  row.setAttribute('aria-expanded', 'false');
+  row.querySelector('.ou-toggle').textContent = '\u25B6';
+}
+
+function selectOuNode(row) {
+  document.querySelectorAll('#ouTree .ou-node-row.selected').forEach(n => {
+    n.classList.remove('selected');
+    n.removeAttribute('aria-selected');
+  });
+  row.classList.add('selected');
+  row.setAttribute('aria-selected', 'true');
+  selectedOu = { id: row.dataset.ouId, name: row.dataset.ouName };
+  document.getElementById('ouPickerLabel').textContent = selectedOu.name;
+  closeOuPopup();
+}
+
+function openOuPopup() {
+  ouPopupTriggerEl = document.activeElement;
+  document.getElementById('ouPopupOverlay').hidden = false;
+  document.getElementById('ouPickerBtn').setAttribute('aria-expanded', 'true');
+
+  (async () => {
+    if (!ouRootsLoaded) {
+      document.getElementById('ouTreeStatus').textContent = 'Loading organisation units...';
+      try {
+        const roots = await fetchOuRoots();
+        const tree = document.getElementById('ouTree');
+        tree.innerHTML = '';
+        roots.forEach(ou => tree.appendChild(createOuNodeEl(ou, 1)));
+        ouRootsLoaded = true;
+        document.getElementById('ouTreeStatus').textContent = '';
+      } catch (err) {
+        document.getElementById('ouTreeStatus').textContent = err.message;
+        return;
+      }
+    }
+    const first = document.querySelector('#ouTree [role="treeitem"]');
+    if (first) setActiveTreeItem(first);
+  })();
+}
+
+function closeOuPopup() {
+  document.getElementById('ouPopupOverlay').hidden = true;
+  document.getElementById('ouPickerBtn').setAttribute('aria-expanded', 'false');
+  if (ouPopupTriggerEl && ouPopupTriggerEl.focus) ouPopupTriggerEl.focus();
+}
+
+document.getElementById('ouPickerBtn').addEventListener('click', openOuPopup);
+document.getElementById('ouPopupClose').addEventListener('click', closeOuPopup);
+document.getElementById('ouPopupOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'ouPopupOverlay') closeOuPopup();
+});
+
+// Click: toggle arrow expands/collapses only; clicking the label itself
+// always selects that org unit (even if it has children — a district or
+// province is just as selectable as a leaf facility).
+document.getElementById('ouTree').addEventListener('click', (e) => {
+  const row = e.target.closest('[role="treeitem"]');
+  if (!row) return;
+  setActiveTreeItem(row);
+  if (e.target.classList.contains('ou-toggle') && row.dataset.hasChildren === 'true') {
+    if (row.getAttribute('aria-expanded') === 'true') collapseOuNode(row);
+    else expandOuNode(row);
+  } else {
+    selectOuNode(row);
+  }
+});
+
+document.getElementById('ouTree').addEventListener('keydown', (e) => {
+  const row = e.target.closest ? e.target.closest('[role="treeitem"]') : null;
+  if (!row) return;
+  const visible = getVisibleTreeItems();
+  const idx = visible.indexOf(row);
+
+  switch (e.key) {
+    case 'ArrowDown':
+      e.preventDefault();
+      if (idx < visible.length - 1) setActiveTreeItem(visible[idx + 1]);
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      if (idx > 0) setActiveTreeItem(visible[idx - 1]);
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      if (row.dataset.hasChildren === 'true') {
+        if (row.getAttribute('aria-expanded') !== 'true') {
+          expandOuNode(row).then(() => {
+            const firstChild = row.parentElement.querySelector(':scope > ul[role="group"] > li > [role="treeitem"]');
+            if (firstChild) setActiveTreeItem(firstChild);
+          });
+        } else {
+          const firstChild = row.parentElement.querySelector(':scope > ul[role="group"] > li > [role="treeitem"]');
+          if (firstChild) setActiveTreeItem(firstChild);
+        }
+      }
+      break;
+    case 'ArrowLeft':
+      e.preventDefault();
+      if (row.dataset.hasChildren === 'true' && row.getAttribute('aria-expanded') === 'true') {
+        collapseOuNode(row);
+      } else {
+        const parentGroup = row.closest('ul[role="group"]');
+        if (parentGroup) {
+          const parentRow = parentGroup.parentElement.querySelector(':scope > [role="treeitem"]');
+          if (parentRow) setActiveTreeItem(parentRow);
+        }
+      }
+      break;
+    case 'Home':
+      e.preventDefault();
+      if (visible.length) setActiveTreeItem(visible[0]);
+      break;
+    case 'End':
+      e.preventDefault();
+      if (visible.length) setActiveTreeItem(visible[visible.length - 1]);
+      break;
+    case 'Enter':
+    case ' ':
+      e.preventDefault();
+      selectOuNode(row);
+      break;
+    case 'Escape':
+      e.preventDefault();
+      closeOuPopup();
+      break;
+  }
+});
+
+/* =========================================================================
+   7. WIRING
    ========================================================================= */
 function $val(id) { return document.getElementById(id).value; }
 function setStatus(msg, isError) {
@@ -493,8 +923,8 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
   // These are type="date" inputs with a Mero Miti BS companion attached —
   // .value is already Gregorian (YYYY-MM-DD) by the time the user has
   // picked a date through the companion, see note above buildAnalyticsUrl.
-  const startDate = $val('startDate');
-  const endDate = $val('endDate');
+  const startDate = $val('startDateBS');
+  const endDate = $val('endDateBS');
   if (!configId || !startDate || !endDate) {
     setStatus('Select a report and both dates.', true);
     return;
@@ -504,7 +934,7 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     const evConfig = await fetchEventVisualizationConfig(configId);
 
     setStatus('Fetching analytics...');
-    const { url, patientKeyDim, columnDims } = buildAnalyticsUrl(evConfig, startDate, endDate);
+    const { url, patientKeyDim, columnDims } = buildAnalyticsUrl(evConfig, startDate, endDate, selectedOu.id);
     const json = await fetchAnalyticsJson(url);
     const { headers, rows } = parseAnalyticsResponse(json);
 
@@ -547,6 +977,62 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     console.error(err);
     setStatus(err.message, true);
   }
+});
+
+document.getElementById('demoBtn').addEventListener('click', () => {
+  const configId = $val('configSelect');
+
+  if (configId === 'imm_demo') {
+    // Synthetic event-level rows (as analytics would return them): each event
+    // only carries values for the vaccines actually given at that visit —
+    // this is what makes the "scan all events per column" logic meaningful.
+    attrColumnNames = ['Name', 'Age'];
+    visitColumns = ['BCG', 'OPV0', 'OPV1', 'Penta1', 'OPV2', 'Penta2', 'OPV3', 'Penta3', 'MR1', 'MR2'];
+    const headers = [
+      { column: 'Tracked entity instance', name: 'tei' }, { column: 'Name' }, { column: 'Age' }, { column: 'Event date' },
+      ...visitColumns.map(c => ({ column: c }))
+    ];
+    // row layout: [tei, name, age, eventDate, BCG, OPV0, OPV1, Penta1, OPV2, Penta2, OPV3, Penta3, MR1, MR2]
+    const blank = () => visitColumns.map(() => '');
+    const rowFor = (tei, name, age, date, given) => {
+      const vals = blank();
+      given.forEach(([col, val]) => { vals[visitColumns.indexOf(col)] = val; });
+      return [tei, name, age, date, ...vals];
+    };
+    const rows = [
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-01-05', [['BCG', 'Given'], ['OPV0', 'Given']]),
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-02-16', [['OPV1', 'Given'], ['Penta1', 'Given']]),
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-03-20', [['OPV2', 'Given'], ['Penta2', 'Given']]),
+      rowFor('imm-2', 'Bina Magar', '0', '2082-03-01', [['BCG', 'Given'], ['OPV0', 'Given']])
+    ];
+    const dateIdx = headers.findIndex(h => h.column === 'Event date');
+    allPatients = groupByPatientFixedColumns(rows, headers, attrColumnNames, visitColumns, 'Event date');
+    setStatus(`Demo loaded (fixed-columns): ${allPatients.length} patients.`);
+  } else {
+    attrColumnNames = ['Name', 'Age', 'Mother name'];
+    visitColumns = ['Visit date', 'Weight (kg)', 'BP', 'Remarks'];
+
+    allPatients = [
+      { tei: 'demo-1', attrs: ['Sita Rai', '24', 'Kamala Rai'], visits: [
+        ['2082-01-12', '58', '110/70', 'Normal'],
+        ['2082-02-10', '59', '112/72', 'Normal'],
+        ['2082-03-05', '60', '115/75', 'Slight edema']
+      ]},
+      { tei: 'demo-2', attrs: ['Gita Thapa', '29', 'Maya Thapa'], visits: [
+        ['2082-01-15', '62', '118/76', 'Normal']
+      ]},
+      { tei: 'demo-3', attrs: ['Anjali Gurung', '21', 'Sarita Gurung'], visits: [
+        ['2082-01-20', '54', '108/68', 'Normal'],
+        ['2082-02-18', '55', '110/70', 'Normal']
+      ]}
+    ];
+    setStatus(`Demo loaded: ${allPatients.length} patients.`);
+  }
+
+  sortState = { columnIndex: -1, direction: 1 };
+  currentPage = 1;
+  applyFilterAndSort();
+  renderScreenTable();
 });
 
 document.getElementById('searchInput').addEventListener('input', () => {
