@@ -16,15 +16,6 @@
      for the locally vendored xlsx.full.min.js copy used elsewhere in the suite). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- PivotTable.js (for the "Analyze" full-screen ad-hoc pivot popup) and its
-     jQuery/jQuery UI dependencies — scoped entirely to that one feature;
-     nothing else in this app uses jQuery. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.22.0/pivot.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pivottable/2.22.0/pivot.min.css">
-
 <style>
   :root {--border: #cfd8dc; --header-bg: #f5f7f8; --patient-bg: #fbfcfc;--accent: #2c6e91;}
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; color: #222; }
@@ -95,19 +86,6 @@
   .ou-toggle.leaf { visibility: hidden; }
   .ou-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  .analyze-popup-overlay {
-    position: fixed; inset: 0; background: #fff; z-index: 1100;
-    display: none; flex-direction: column;
-  }
-  .analyze-popup-overlay:not([hidden]) { display: flex; }
-  .analyze-popup { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-  .analyze-popup-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px;
-    flex-shrink: 0;
-  }
-  .pivot-container { flex: 1; overflow: auto; padding: 10px 16px; min-height: 0; }
-
   @media print {
     .controls, .toolbar, .pagination, #statusMsg { display: none !important; }
     #screenTable { display: none !important; }
@@ -142,28 +120,6 @@
   </div>
   <div>
     <button id="fetchBtn">Fetch &amp; Render</button>
-  </div>
-  <div>
-    <button type="button" id="analyzeBtn" class="secondary" disabled
-      aria-haspopup="true" aria-expanded="false" aria-controls="analyzePopup"
-      title="Fetch &amp; Render a report first">
-      Analyze
-    </button>
-  </div>
-</div>
-
-<!-- Full-screen ad-hoc analysis popup: PivotTable.js drag-and-drop UI
-     loaded with the complete flat analytics rows from the last fetch (not
-     the patient-grouped/rowspanned register view — pivoting needs the raw
-     one-row-per-event granularity, which the register view deliberately
-     collapses). Rebuilt fresh from the latest fetch every time it's opened. -->
-<div id="analyzePopupOverlay" class="analyze-popup-overlay" hidden>
-  <div id="analyzePopup" class="analyze-popup" role="dialog" aria-modal="true" aria-labelledby="analyzePopupTitle">
-    <div class="analyze-popup-header">
-      <span id="analyzePopupTitle">Analyze data</span>
-      <button type="button" id="analyzePopupClose" class="ou-popup-close" aria-label="Close">&times;</button>
-    </div>
-    <div id="pivotContainer" class="pivot-container"></div>
   </div>
 </div>
 
@@ -237,9 +193,6 @@ let currentPage = 1;
 let pageSize = 10; // matches the <option selected> default in pageSizeSelect
 let selectedOu = { id: null, name: 'My org unit (default)' }; // null id => USER_ORGUNIT
 let ouPopupTriggerEl = null; // element to restore focus to when popup closes
-let lastAnalyticsHeaders = null; // raw (flat, one-row-per-event) headers/rows
-let lastAnalyticsRows = null;    // from the most recent successful fetch — feeds the Analyze popup
-let analyzePopupTriggerEl = null;
 
 /* =========================================================================
    1. FETCH: eventVisualization config -> analytics JSON (unchanged from
@@ -901,53 +854,7 @@ document.getElementById('ouTree').addEventListener('keydown', (e) => {
 });
 
 /* =========================================================================
-   7. ANALYZE / AD-HOC PIVOT POPUP — full-screen PivotTable.js drag-and-
-      drop UI (https://github.com/nicolaskruchten/pivottable), loaded with
-      the complete flat analytics rows from the last successful fetch.
-      Rebuilt fresh every time the popup opens, so it always reflects
-      whatever was most recently fetched.
-   ========================================================================= */
-// PivotTable.js's pivotUI() wants an array of plain objects (or array-of-
-// arrays with a header row) — convert our {headers, rows} shape into that.
-function analyticsRowsToObjects(headers, rows) {
-  const keys = headers.map(h => h.column || h.name);
-  return rows.map(row => {
-    const obj = {};
-    keys.forEach((k, i) => { obj[k] = row[i]; });
-    return obj;
-  });
-}
-
-function openAnalyzePopup() {
-  if (!lastAnalyticsHeaders || !lastAnalyticsRows) return; // button is disabled in this case anyway
-
-  analyzePopupTriggerEl = document.activeElement;
-  document.getElementById('analyzePopupOverlay').hidden = false;
-  document.getElementById('analyzeBtn').setAttribute('aria-expanded', 'true');
-
-  const data = analyticsRowsToObjects(lastAnalyticsHeaders, lastAnalyticsRows);
-  const $container = $('#pivotContainer');
-  $container.empty(); // discard any previous pivotUI instance before rebuilding
-  $container.pivotUI(data, {
-    rendererName: 'Table',
-    unusedAttrsVertical: false
-  });
-}
-
-function closeAnalyzePopup() {
-  document.getElementById('analyzePopupOverlay').hidden = true;
-  document.getElementById('analyzeBtn').setAttribute('aria-expanded', 'false');
-  if (analyzePopupTriggerEl && analyzePopupTriggerEl.focus) analyzePopupTriggerEl.focus();
-}
-
-document.getElementById('analyzeBtn').addEventListener('click', openAnalyzePopup);
-document.getElementById('analyzePopupClose').addEventListener('click', closeAnalyzePopup);
-document.getElementById('analyzePopupOverlay').addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') closeAnalyzePopup();
-});
-
-/* =========================================================================
-   8. WIRING
+   7. WIRING
    ========================================================================= */
 function $val(id) { return document.getElementById(id).value; }
 function setStatus(msg, isError) {
@@ -975,16 +882,6 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     const { url, patientKeyDim, columnDims } = buildAnalyticsUrl(evConfig, startDate, endDate, selectedOu.id);
     const json = await fetchAnalyticsJson(url);
     const { headers, rows } = parseAnalyticsResponse(json);
-
-    // Keep the raw flat (one-row-per-event) data for the Analyze popup —
-    // deliberately NOT the patient-grouped/rowspanned structure, since
-    // pivoting needs the full event-level granularity the register view
-    // collapses away.
-    lastAnalyticsHeaders = headers;
-    lastAnalyticsRows = rows;
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    analyzeBtn.disabled = false;
-    analyzeBtn.title = 'Open ad-hoc pivot analysis of the fetched data';
 
     // Classify by POSITION against columnDims, not by matching header text
     // to a UID — dataIdScheme=NAME means headers come back as resolved
