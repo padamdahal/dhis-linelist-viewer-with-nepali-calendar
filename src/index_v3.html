@@ -7,9 +7,7 @@
 <script
   src="https://meromiti.com/mero-miti.js"
   data-mero-miti-auto="true"
-  data-mero-miti-auto-sync="true"
-  data-mero-miti-locale="en"
-  data-mero-miti-format="YYYY-MM-DD">
+  data-mero-miti-auto-sync="true">
 </script>
 
 <!-- SheetJS for export (matches existing vendored stack — swap this CDN line
@@ -17,10 +15,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
-  :root {--border: #cfd8dc; --header-bg: #f5f7f8; --patient-bg: #fbfcfc;--accent: #2c6e91;}
+  :root {
+    --border: #cfd8dc;
+    --header-bg: #f5f7f8;
+    --patient-bg: #fbfcfc;
+    --accent: #2c6e91;
+  }
   body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; color: #222; }
   h1 { font-size: 18px; margin-bottom: 12px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px;border-bottom: 1px solid #ccc;background: #ddd; padding: 10px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 14px; }
   .controls label { display: block; font-size: 12px; color: #555; margin-bottom: 3px; }
   .controls select, .controls input, .controls button {
     padding: 6px 8px; font-size: 13px; border: 1px solid var(--border); border-radius: 4px;
@@ -30,23 +33,41 @@
   .controls button:hover { opacity: 0.9; }
   .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
   .toolbar .right { display: flex; gap: 8px; align-items: center; }
-  table.register {border-collapse: collapse;width: 100%;font-size: 12.5px;}
-  table.register th, table.register td {border: 1px solid var(--border);padding: 6px 8px;text-align: left;vertical-align: top;}
-  table.register thead th {background: var(--header-bg);font-weight: 600;white-space: nowrap;cursor: pointer;user-select: none;
+
+  table.register {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+  }
+  table.register th, table.register td {
+    border: 1px solid var(--border);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.register thead th {
+    background: var(--header-bg);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
   }
   table.register thead th.sortable:hover { background: #eceff1; }
   table.register thead th .arrow { font-size: 10px; opacity: 0.6; margin-left: 4px; }
-  table.register td.attr-cell {background: var(--patient-bg);font-weight: 500;vertical-align: middle;}
-  table.register tr.new-patient td {border-top: 2px solid var(--accent);}
+  table.register td.attr-cell {
+    background: var(--patient-bg);
+    font-weight: 500;
+    vertical-align: middle;
+  }
+  table.register tr.new-patient td {
+    border-top: 2px solid var(--accent);
+  }
   .status-msg { font-size: 12px; color: #666; margin: 6px 0; }
   .status-msg.error { color: #b00020; }
   .pagination { display: flex; gap: 6px; align-items: center; margin-top: 10px; font-size: 13px; }
   .pagination button { padding: 4px 10px; }
   .pagination button:disabled { opacity: 0.4; cursor: default; }
 
-  .mero-miti-input-group{border: none !important; background: none !important;}
-  .mero-miti-input{background:#fff !important}
-  
   #printTable { display: none; }
 
   .ou-popup-overlay {
@@ -54,8 +75,9 @@
     display: none; align-items: center; justify-content: center; z-index: 1000;
   }
   /* An author stylesheet rule overrides the UA default [hidden]{display:none}
-     even when the HTML has the hidden attribute — gating the visible state
-     behind :not([hidden]) instead of a bare "display: flex" avoids that. */
+     even when the HTML has the hidden attribute — "display: flex" above was
+     winning regardless of hidden, which is why the popup showed on page
+     load. Gating the visible state behind :not([hidden]) instead fixes it. */
   .ou-popup-overlay:not([hidden]) {
     display: flex;
   }
@@ -95,22 +117,24 @@
 </head>
 <body>
 
-<h1>Register View</h1>
+<h1>Paper Register — Patient Grouped View</h1>
 
 <div class="controls">
   <div>
-    <label>Register Config</label>
+    <label>Line Listing config</label>
     <select id="configSelect">
-      <option value="">-- Select Report --</option>
+      <option value="">-- select report --</option>
+      <option value="anc_demo">ANC Register (demo)</option>
+      <option value="imm_demo">Immunization Register (demo)</option>
     </select>
   </div>
   <div>
-    <label>Start date (AD)</label>
-    <input type="date" id="startDate">
+    <label>Start date (BS)</label>
+    <input type="date" id="startDateBS">
   </div>
   <div>
-    <label>End date (AD)</label>
-    <input type="date" id="endDate">
+    <label>End date (BS)</label>
+    <input type="date" id="endDateBS">
   </div>
   <div>
     <label>Organisation unit</label>
@@ -120,6 +144,9 @@
   </div>
   <div>
     <button id="fetchBtn">Fetch &amp; Render</button>
+  </div>
+  <div>
+    <button id="demoBtn" class="secondary">Load demo data (no API)</button>
   </div>
 </div>
 
@@ -148,8 +175,8 @@
   <div class="right">
     <label style="margin:0;">Rows/page:
       <select id="pageSizeSelect">
-        <option value="10" selected>10</option>
-        <option value="20">20</option>
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
         <option value="50">50</option>
       </select>
     </label>
@@ -177,7 +204,7 @@
    CONFIG
    ========================================================================= */
 const CONFIG = {
-  baseUrl: '../../../api',
+  baseUrl: '/ephc/api',
 };
 
 /* =========================================================================
@@ -190,7 +217,7 @@ let visitColumns = [];
 let filteredPatients = [];
 let sortState = { columnIndex: -1, direction: 1 }; // -1 = no sort (source order)
 let currentPage = 1;
-let pageSize = 10; // matches the <option selected> default in pageSizeSelect
+let pageSize = 20;
 let selectedOu = { id: null, name: 'My org unit (default)' }; // null id => USER_ORGUNIT
 let ouPopupTriggerEl = null; // element to restore focus to when popup closes
 
@@ -228,6 +255,11 @@ async function populateConfigDropdown() {
     // Keep the demo entries (useful for testing without a live instance),
     // append real ones below a separator.
     if (data.eventVisualizations && data.eventVisualizations.length) {
+      const sep = document.createElement('option');
+      sep.disabled = true;
+      sep.textContent = '──────────';
+      select.appendChild(sep);
+
       data.eventVisualizations
         .sort((a, b) => a.name.localeCompare(b.name))
         .forEach(ev => {
@@ -243,6 +275,29 @@ async function populateConfigDropdown() {
   }
 }
 
+// BS→AD conversion is no longer done here at all: startDateBS/endDateBS
+// are now type="date" inputs, and Mero Miti (loaded in <head> with
+// data-mero-miti-auto="true") auto-attaches a BS calendar companion to any
+// input[type="date"] on the page. The user picks a BS date in that
+// companion; Mero Miti writes the converted Gregorian date straight back
+// into THIS input's native value (YYYY-MM-DD) and fires input/change
+// events — so by the time this code reads these inputs' .value, it's
+// already Gregorian. No conversion call needed on our side.
+
+// Builds the real analytics/events "query" endpoint URL from the actual
+// eventVisualization field shape: attributeDimensions (TEI attributes) and
+// dataElementDimensions (stage-scoped DEs) are separate arrays of
+// {attribute:{id}} / {dataElement:{id}} refs, not one flat list — and
+// programStage is a top-level field, not derived from a dimension string.
+//
+// NOTE: there's no outputType in the requested fields, and programStage
+// being a top-level field is being taken as confirmation these LINE_LIST
+// configs are EVENT-scoped (one fixed stage). ENROLLMENT/TRACKED_ENTITY_
+// INSTANCE output isn't handled here yet — add it once we see a real
+// config shape for one of those.
+//
+// startDate/endDate are now expected to already be Gregorian (YYYY-MM-DD),
+// read directly from the type="date" inputs — see note above.
 function buildAnalyticsUrl(evConfig, startDate, endDate, ou) {
   const programId = evConfig.program?.id;
   const stageId = evConfig.programStage?.id;
@@ -320,9 +375,9 @@ function parseAnalyticsResponse(json) {
    used for chronological sorting, so formatting can't corrupt sort order.
    ========================================================================= */
 // AD date string -> "AD (BS)" using the real MeroMiti.adToBs/formatBsDate
-// API. Feeds a plain {year,month,day} object into adToBs rather than
-// constructing a JS Date, so there's no local-timezone rollover risk on
-// the date-only string.
+// API (confirmed from the actual mero-miti.js source). Feeds a plain
+// {year,month,day} object into adToBs rather than constructing a JS Date,
+// so there's no local-timezone rollover risk on the date-only string.
 function formatWithBs(adDateStr) {
   if (!adDateStr) return '';
   const isoPart = String(adDateStr).slice(0, 10);
@@ -868,8 +923,8 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
   // These are type="date" inputs with a Mero Miti BS companion attached —
   // .value is already Gregorian (YYYY-MM-DD) by the time the user has
   // picked a date through the companion, see note above buildAnalyticsUrl.
-  const startDate = $val('startDate');
-  const endDate = $val('endDate');
+  const startDate = $val('startDateBS');
+  const endDate = $val('endDateBS');
   if (!configId || !startDate || !endDate) {
     setStatus('Select a report and both dates.', true);
     return;
@@ -922,6 +977,62 @@ document.getElementById('fetchBtn').addEventListener('click', async () => {
     console.error(err);
     setStatus(err.message, true);
   }
+});
+
+document.getElementById('demoBtn').addEventListener('click', () => {
+  const configId = $val('configSelect');
+
+  if (configId === 'imm_demo') {
+    // Synthetic event-level rows (as analytics would return them): each event
+    // only carries values for the vaccines actually given at that visit —
+    // this is what makes the "scan all events per column" logic meaningful.
+    attrColumnNames = ['Name', 'Age'];
+    visitColumns = ['BCG', 'OPV0', 'OPV1', 'Penta1', 'OPV2', 'Penta2', 'OPV3', 'Penta3', 'MR1', 'MR2'];
+    const headers = [
+      { column: 'Tracked entity instance', name: 'tei' }, { column: 'Name' }, { column: 'Age' }, { column: 'Event date' },
+      ...visitColumns.map(c => ({ column: c }))
+    ];
+    // row layout: [tei, name, age, eventDate, BCG, OPV0, OPV1, Penta1, OPV2, Penta2, OPV3, Penta3, MR1, MR2]
+    const blank = () => visitColumns.map(() => '');
+    const rowFor = (tei, name, age, date, given) => {
+      const vals = blank();
+      given.forEach(([col, val]) => { vals[visitColumns.indexOf(col)] = val; });
+      return [tei, name, age, date, ...vals];
+    };
+    const rows = [
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-01-05', [['BCG', 'Given'], ['OPV0', 'Given']]),
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-02-16', [['OPV1', 'Given'], ['Penta1', 'Given']]),
+      rowFor('imm-1', 'Rojan Karki', '1', '2082-03-20', [['OPV2', 'Given'], ['Penta2', 'Given']]),
+      rowFor('imm-2', 'Bina Magar', '0', '2082-03-01', [['BCG', 'Given'], ['OPV0', 'Given']])
+    ];
+    const dateIdx = headers.findIndex(h => h.column === 'Event date');
+    allPatients = groupByPatientFixedColumns(rows, headers, attrColumnNames, visitColumns, 'Event date');
+    setStatus(`Demo loaded (fixed-columns): ${allPatients.length} patients.`);
+  } else {
+    attrColumnNames = ['Name', 'Age', 'Mother name'];
+    visitColumns = ['Visit date', 'Weight (kg)', 'BP', 'Remarks'];
+
+    allPatients = [
+      { tei: 'demo-1', attrs: ['Sita Rai', '24', 'Kamala Rai'], visits: [
+        ['2082-01-12', '58', '110/70', 'Normal'],
+        ['2082-02-10', '59', '112/72', 'Normal'],
+        ['2082-03-05', '60', '115/75', 'Slight edema']
+      ]},
+      { tei: 'demo-2', attrs: ['Gita Thapa', '29', 'Maya Thapa'], visits: [
+        ['2082-01-15', '62', '118/76', 'Normal']
+      ]},
+      { tei: 'demo-3', attrs: ['Anjali Gurung', '21', 'Sarita Gurung'], visits: [
+        ['2082-01-20', '54', '108/68', 'Normal'],
+        ['2082-02-18', '55', '110/70', 'Normal']
+      ]}
+    ];
+    setStatus(`Demo loaded: ${allPatients.length} patients.`);
+  }
+
+  sortState = { columnIndex: -1, direction: 1 };
+  currentPage = 1;
+  applyFilterAndSort();
+  renderScreenTable();
 });
 
 document.getElementById('searchInput').addEventListener('input', () => {
