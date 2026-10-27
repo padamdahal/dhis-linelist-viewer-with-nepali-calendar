@@ -2,23 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Paper Register - Patient Grouped View</title>
-
-<script
-  src="https://meromiti.com/mero-miti.js"
-  data-mero-miti-auto="true"
-  data-mero-miti-auto-sync="true"
-  data-mero-miti-locale="en"
-  data-mero-miti-format="YYYY-MM-DD">
+<title>Register Viewer</title>
+<script src="https://meromiti.com/mero-miti.js" data-mero-miti-auto="true" data-mero-miti-auto-sync="true" data-mero-miti-locale="en" data-mero-miti-format="YYYY-MM-DD">
 </script>
-
-<!-- SheetJS for export (matches existing vendored stack — swap this CDN line
-     for the locally vendored xlsx.full.min.js copy used elsewhere in the suite). -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<!-- PivotTable.js (for the "Analyze" full-screen ad-hoc pivot popup) and its
-     jQuery/jQuery UI dependencies — scoped entirely to that one feature;
-     nothing else in this app uses jQuery. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/smoothness/jquery-ui.min.css">
@@ -121,42 +108,37 @@
 
 <div class="controls">
   <div>
-    <label>Register Config</label>
+    <label>Register</label>
     <select id="configSelect">
       <option value="">-- Select Report --</option>
     </select>
   </div>
   <div>
-    <label>Start date (AD)</label>
+    <label>Start date</label>
     <input type="date" id="startDate">
   </div>
   <div>
-    <label>End date (AD)</label>
+    <label>End date</label>
     <input type="date" id="endDate">
   </div>
   <div>
     <label>Organisation unit</label>
     <button type="button" id="ouPickerBtn" class="secondary" aria-haspopup="true" aria-expanded="false" aria-controls="ouPopup">
-      <span id="ouPickerLabel">My org unit (default)</span>
+      <span id="ouPickerLabel">My org unit</span>
     </button>
   </div>
   <div>
-    <button id="fetchBtn">Fetch &amp; Render</button>
+    <button id="fetchBtn">Load Register</button>
   </div>
   <div>
     <button type="button" id="analyzeBtn" class="secondary" disabled
       aria-haspopup="true" aria-expanded="false" aria-controls="analyzePopup"
-      title="Fetch &amp; Render a report first">
+      title="Load Register first">
       Analyze
     </button>
   </div>
 </div>
 
-<!-- Full-screen ad-hoc analysis popup: PivotTable.js drag-and-drop UI
-     loaded with the complete flat analytics rows from the last fetch (not
-     the patient-grouped/rowspanned register view — pivoting needs the raw
-     one-row-per-event granularity, which the register view deliberately
-     collapses). Rebuilt fresh from the latest fetch every time it's opened. -->
 <div id="analyzePopupOverlay" class="analyze-popup-overlay" hidden>
   <div id="analyzePopup" class="analyze-popup" role="dialog" aria-modal="true" aria-labelledby="analyzePopupTitle">
     <div class="analyze-popup-header">
@@ -167,11 +149,6 @@
   </div>
 </div>
 
-<!-- Org unit picker popup: a WAI-ARIA treeview dialog. Keyboard: Up/Down
-     move focus between visible nodes, Right expands/enters children, Left
-     collapses/moves to parent, Enter/Space selects and closes, Escape
-     closes without changing selection. Uses a roving tabindex (one node
-     is tabindex="0" at a time) rather than tabbing through every node. -->
 <div id="ouPopupOverlay" class="ou-popup-overlay" hidden>
   <div id="ouPopup" class="ou-popup" role="dialog" aria-modal="true" aria-labelledby="ouPopupTitle">
     <div class="ou-popup-header">
